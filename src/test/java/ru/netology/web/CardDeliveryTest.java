@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
 
 public class CardDeliveryTest {
@@ -107,14 +108,12 @@ public class CardDeliveryTest {
 
     @Test
     public void shouldNoPhone() {
-        {
-            $("[data-test-id=city] input").setValue("Казань");
-            $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
-            $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
-            $(".checkbox__box").click();
-            $(".button").click();
-            $("[data-test-id=phone].input_invalid .input__sub").shouldHave(exactText("Поле обязательно для заполнения"));
-        }
+        $("[data-test-id=city] input").setValue("Казань");
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
+        $(".checkbox__box").click();
+        $(".button").click();
+        $("[data-test-id=phone].input_invalid .input__sub").shouldHave(exactText("Поле обязательно для заполнения"));
     }
 
     @Test
@@ -125,6 +124,57 @@ public class CardDeliveryTest {
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".button").click();
         $("[data-test-id=agreement].input_invalid").shouldBe(visible, Duration.ofSeconds(5));
+    }
+
+    @Test
+    public void shouldSendFormTwoCharCity() {
+        $("[data-test-id=city] input").setValue("Ка").click();
+        $(".popup__inner").shouldBe(exist, Duration.ofSeconds(5));
+        $(byText("Екатеринбург")).click();
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
+        $("[data-test-id=phone] input").setValue("+79120009999");
+        $(".checkbox__box").click();
+        $(".button").click();
+        WebElement title = $("[data-test-id=notification] .notification__title").shouldBe(visible, Duration.ofSeconds(20));
+        Assertions.assertEquals("Успешно!", title.getText());
+        WebElement content = $("[data-test-id=notification] .notification__content");
+        Assertions.assertEquals("Встреча успешно забронирована на " + getFutureDate(4), content.getText());
+    }
+
+    @Test
+    public void shouldSendFormCalendar() {
+        $("[data-test-id=city] input").setValue("Казань");
+
+//// Получаем текущую дату
+//        LocalDate currentDate = LocalDate.now();
+////
+//// Добавляем неделю к текущей дате
+//        LocalDate futureDate = currentDate.plusWeeks(1);
+////
+////// Получаем месяц и год будущей даты
+//        String futureMonth = futureDate.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault());
+//        int futureYear = futureDate.getYear();
+////
+////// Получаем день будущей даты
+//        int futureDay = futureDate.getDayOfMonth();
+//
+//        Выбираем месяц и год будущей даты
+//        $("div.popup.popup_direction_bottom-left .calendar__name").$(By.xpath("//[text()=" + futureMonth + " " + futureYear + "]")).click();
+////
+////// Выбираем день будущей даты
+//        $("table.calendar__layout").$(By.xpath("//span[text()='" + futureDay + "']")).click();
+
+        $("button span.icon_name_calendar").click();
+        $("body > div.popup.popup_direction_bottom-left > div > div > div > div > div > div").shouldBe(visible, Duration.ofSeconds(10));
+        $("div.popup.popup_direction_bottom-left div:nth-child(4)").click();
+        $(byText("4")).click();
+        $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
+        $("[data-test-id=phone] input").setValue("+79120009999");
+        $(".checkbox__box").click();
+        $(".button").click();
+        WebElement title = $("[data-test-id=notification] .notification__title").shouldBe(visible, Duration.ofSeconds(20));
+        Assertions.assertEquals("Успешно!", title.getText());
     }
 
 }
