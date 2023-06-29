@@ -1,10 +1,8 @@
 package ru.netology.web;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -20,47 +18,48 @@ public class CardDeliveryTest {
         open("http://localhost:9999/");
     }
 
-    private String getFutureDate(int addDays) {
-        LocalDate currentDate = LocalDate.now();
-        LocalDate futureDate = currentDate.plusDays(addDays);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        String formattedDate = futureDate.format(formatter);
-        return formattedDate;
+    public String generateDate(long addDays, String pattern) {
+        return LocalDate.now().plusDays(addDays).format(DateTimeFormatter.ofPattern(pattern));
     }
+
 
     @Test
     public void shouldSendForm() {
+        String planningDate = generateDate(7, "dd.MM.yyyy");
+
         $("[data-test-id=city] input").setValue("Казань");
-        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(planningDate);
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
         $(".button").click();
-        WebElement title = $("[data-test-id=notification] .notification__title").shouldBe(visible, Duration.ofSeconds(20));
-        Assertions.assertEquals("Успешно!", title.getText());
-        WebElement content = $("[data-test-id=notification] .notification__content");
-        Assertions.assertEquals("Встреча успешно забронирована на " + getFutureDate(4), content.getText());
+        $("[data-test-id=notification] .notification__title").shouldHave(exactText("Успешно!"), Duration.ofSeconds(20));
+        $("[data-test-id=notification] .notification__content").shouldHave(exactText("Встреча успешно забронирована на " + planningDate));
     }
 
     @Test
     public void shouldValidateCity() {
+        String planningDate = generateDate(9, "dd.MM.yyyy");
+
         $("[data-test-id=city] input").setValue("Нью-Йорк");
-        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(planningDate);
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
         $(".button").click();
-        $("[data-test-id=city].input_invalid .input__sub").shouldHave(exactText("Доставка в выбранный город недоступна"));
+        $("[data-test-id=city].input_invalid .input__sub").shouldHave(exactText("Доставка в выбранный город недоступна"), Duration.ofSeconds(10));
     }
 
     @Test
     public void shouldNotCity() {
-        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        String planningDate = generateDate(3, "dd.MM.yyyy");
+
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(planningDate);
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
         $(".button").click();
-        $("[data-test-id=city].input_invalid .input__sub").shouldHave(exactText("Поле обязательно для заполнения"));
+        $("[data-test-id=city].input_invalid .input__sub").shouldHave(exactText("Поле обязательно для заполнения"), Duration.ofSeconds(10));
     }
 
     @Test
@@ -71,110 +70,101 @@ public class CardDeliveryTest {
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
         $(".button").click();
-        $("[data-test-id=date] .input_invalid .input__sub").shouldHave(exactText("Неверно введена дата"));
+        $("[data-test-id=date] .input_invalid .input__sub").shouldHave(exactText("Неверно введена дата"), Duration.ofSeconds(10));
     }
 
     @Test
     public void shouldValidateName() {
+        String planningDate = generateDate(5, "dd.MM.yyyy");
+
         $("[data-test-id=city] input").setValue("Казань");
-        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(planningDate);
         $("[data-test-id=name] input").setValue("Aleksandr!@$#@$#");
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
         $(".button").click();
-        $("[data-test-id=name].input_invalid .input__sub").shouldHave(exactText("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы."));
+        $("[data-test-id=name].input_invalid .input__sub").shouldHave(exactText("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы."), Duration.ofSeconds(10));
     }
 
     @Test
     public void shouldNoName() {
+        String planningDate = generateDate(4, "dd.MM.yyyy");
+
         $("[data-test-id=city] input").setValue("Казань");
-        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(planningDate);
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
         $(".button").click();
-        $("[data-test-id=name].input_invalid .input__sub").shouldHave(exactText("Поле обязательно для заполнения"));
+        $("[data-test-id=name].input_invalid .input__sub").shouldHave(exactText("Поле обязательно для заполнения"), Duration.ofSeconds(10));
     }
 
     @Test
     public void shouldValidatePhone() {
+        String planningDate = generateDate(12, "dd.MM.yyyy");
+
         $("[data-test-id=city] input").setValue("Казань");
-        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(planningDate);
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $("[data-test-id=phone] input").setValue("+7912000");
         $(".checkbox__box").click();
         $(".button").click();
-        $("[data-test-id=phone].input_invalid .input__sub").shouldHave(exactText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."));
+        $("[data-test-id=phone].input_invalid .input__sub").shouldHave(exactText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."), Duration.ofSeconds(10));
     }
 
     @Test
     public void shouldNoPhone() {
+        String planningDate = generateDate(8, "dd.MM.yyyy");
+
         $("[data-test-id=city] input").setValue("Казань");
-        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(planningDate);
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $(".checkbox__box").click();
         $(".button").click();
-        $("[data-test-id=phone].input_invalid .input__sub").shouldHave(exactText("Поле обязательно для заполнения"));
+        $("[data-test-id=phone].input_invalid .input__sub").shouldHave(exactText("Поле обязательно для заполнения"), Duration.ofSeconds(10));
     }
 
     @Test
     public void shouldInvalidCheckBox() {
+        String planningDate = generateDate(6, "dd.MM.yyyy");
+
         $("[data-test-id=city] input").setValue("Казань");
-        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(planningDate);
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".button").click();
-        $("[data-test-id=agreement].input_invalid").shouldBe(visible, Duration.ofSeconds(5));
+        $("[data-test-id=agreement].input_invalid").shouldHave(exactText("Я соглашаюсь с условиями обработки и использования моих персональных данных"), Duration.ofSeconds(10));
     }
 
     @Test
     public void shouldSendFormTwoCharCity() {
+        String planningDate = generateDate(10, "dd.MM.yyyy");
+
         $("[data-test-id=city] input").setValue("Ка").click();
         $(".popup__inner").shouldBe(exist, Duration.ofSeconds(5));
         $(byText("Екатеринбург")).click();
-        $(".calendar-input__custom-control input").doubleClick().sendKeys(getFutureDate(4));
+        $(".calendar-input__custom-control input").doubleClick().sendKeys(planningDate);
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
         $(".button").click();
-        WebElement title = $("[data-test-id=notification] .notification__title").shouldBe(visible, Duration.ofSeconds(20));
-        Assertions.assertEquals("Успешно!", title.getText());
-        WebElement content = $("[data-test-id=notification] .notification__content");
-        Assertions.assertEquals("Встреча успешно забронирована на " + getFutureDate(4), content.getText());
+        $("[data-test-id=notification] .notification__title").shouldHave(exactText("Успешно!"), Duration.ofSeconds(20));
+        $("[data-test-id=notification] .notification__content").shouldHave(exactText("Встреча успешно забронирована на " + planningDate));
     }
 
     @Test
     public void shouldSendFormCalendar() {
         $("[data-test-id=city] input").setValue("Казань");
-
-//// Получаем текущую дату
-//        LocalDate currentDate = LocalDate.now();
-////
-//// Добавляем неделю к текущей дате
-//        LocalDate futureDate = currentDate.plusWeeks(1);
-////
-////// Получаем месяц и год будущей даты
-//        String futureMonth = futureDate.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault());
-//        int futureYear = futureDate.getYear();
-////
-////// Получаем день будущей даты
-//        int futureDay = futureDate.getDayOfMonth();
-//
-//        Выбираем месяц и год будущей даты
-//        $("div.popup.popup_direction_bottom-left .calendar__name").$(By.xpath("//[text()=" + futureMonth + " " + futureYear + "]")).click();
-////
-////// Выбираем день будущей даты
-//        $("table.calendar__layout").$(By.xpath("//span[text()='" + futureDay + "']")).click();
-
         $("button span.icon_name_calendar").click();
-        $("body > div.popup.popup_direction_bottom-left > div > div > div > div > div > div").shouldBe(visible, Duration.ofSeconds(10));
-        $("div.popup.popup_direction_bottom-left div:nth-child(4)").click();
+        $("div.calendar-input__calendar-wrapper").shouldBe(visible, Duration.ofSeconds(15));
+        if (!generateDate(7, "MM").equals(generateDate(3, "MM"))) {
+            $("div.popup div:nth-child(4)").click();
+        }
         $(byText("4")).click();
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
         $(".button").click();
-        WebElement title = $("[data-test-id=notification] .notification__title").shouldBe(visible, Duration.ofSeconds(20));
-        Assertions.assertEquals("Успешно!", title.getText());
+        $("[data-test-id=notification] .notification__title").shouldHave(exactText("Успешно!"), Duration.ofSeconds(20));
     }
 
 }
