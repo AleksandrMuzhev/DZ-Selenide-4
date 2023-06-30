@@ -153,18 +153,22 @@ public class CardDeliveryTest {
 
     @Test
     public void shouldSendFormCalendar() {
+        String planningDay = generateDate(7, "d");
+        String planningDate = generateDate(Long.parseLong(planningDay), "dd.MM.yyyy");
+
         $("[data-test-id=city] input").setValue("Казань");
         $("button span.icon_name_calendar").click();
         $("div.calendar-input__calendar-wrapper").shouldBe(visible, Duration.ofSeconds(15));
         if (!generateDate(7, "MM").equals(generateDate(3, "MM"))) {
             $("div.popup div:nth-child(4)").click();
         }
-        $(byText("4")).click();
+        $(byText(planningDay)).click();
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
         $(".button").click();
         $("[data-test-id=notification] .notification__title").shouldHave(exactText("Успешно!"), Duration.ofSeconds(20));
+        $("[data-test-id=notification] .notification__content").shouldHave(exactText("Встреча успешно забронирована на " + planningDate));
     }
 
 }
