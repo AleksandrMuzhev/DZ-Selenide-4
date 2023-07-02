@@ -137,8 +137,7 @@ public class CardDeliveryTest {
 
     @Test
     public void shouldSendFormCalendar() {
-        String planningDay = generateDate(7, "d");
-        String planningDate = generateDate(Long.parseLong(planningDay) - 1, "dd.MM.yyyy");
+        String planningDate = generateDate(7, "dd.MM.yyyy");
 
         $("[data-test-id=city] input").setValue("Ка");
         $(".popup__inner").shouldBe(exist, Duration.ofSeconds(5));
@@ -146,9 +145,9 @@ public class CardDeliveryTest {
         $("button span.icon_name_calendar").click();
         $("div.calendar-input__calendar-wrapper").shouldBe(visible, Duration.ofSeconds(40));
         if (!generateDate(7, "MM").equals(generateDate(3, "MM"))) {
-            $("div.popup div:nth-child(4)").click();
+            $(".popup [data-step='1']").click();
         }
-        $$(".calendar__day").find(text("8")).click();
+        $$(".calendar__day").find(text(generateDate(7, "d"))).click();
         $("[data-test-id=name] input").setValue("Александр Мужев-Иванов");
         $("[data-test-id=phone] input").setValue("+79120009999");
         $(".checkbox__box").click();
